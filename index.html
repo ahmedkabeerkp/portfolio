@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahmed Kabeer | Application Developer & UI Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans:    ['Inter',  'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            background: '#030303',
+            surface:    '#0a0a0a',
+            surface2:   '#111111',
+            primary:    '#ffffff',
+            secondary:  '#888888',
+            accent:     '#4ade80',
+            accentBlue: '#2563EB',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-background text-primary antialiased overflow-x-hidden">
+
+  <!-- Scroll-progress bar — right edge -->
+  <div id="scroll-progress"
+       class="fixed top-0 right-0 z-[60] h-screen w-[3px] pointer-events-none"
+       aria-hidden="true">
+    <div class="scroll-progress__track"></div>
+    <div class="scroll-progress__fill" id="scroll-progress-fill"></div>
+  </div>
+
+  <!-- Preloader -->
+  <div class="loader fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center">
+    <div class="overflow-hidden">
+      <h1 class="loader-text text-4xl md:text-6xl font-display font-medium text-white" style="transform:translateY(100%)">
+        Ahmed Kabeer
+      </h1>
+    </div>
+    <div class="w-48 h-[2px] mt-8 relative overflow-hidden rounded-full" style="background:rgba(136,136,136,0.2)">
+      <div class="loader-progress absolute inset-y-0 left-0 w-0 rounded-full" style="background:#4ade80"></div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-50 mix-blend-difference pointer-events-none" id="navbar">
+    <div class="max-w-[1400px] mx-auto px-6 py-8 flex items-center nav-content" style="opacity:0">
+      <div class="font-display font-bold text-xl pointer-events-auto cursor-pointer text-white">AK©</div>
+    </div>
+  </nav>
+
+  <main class="relative z-10">
+    <div id="smooth-content">
+
+      <!-- ══════════════════════════════════
+           HERO
+           Name is in the DOM always. Preloader
+           covers it; GSAP reveals it on exit.
+      ══════════════════════════════════════ -->
+      <section id="hero"
+        class="hero-section h-screen w-full flex flex-col justify-center
+               px-6 md:px-12 lg:px-24 max-w-[1400px] mx-auto relative">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-content relative z-10 w-full max-w-5xl">
+
+          <div class="mb-4">
+            <!-- section-heading adds hover: green + translateY(-4px) -->
+            <h1 class="hero-name section-heading
+                        text-[clamp(3rem,8vw,5.5rem)]
+                        font-display font-bold leading-[0.95] tracking-tight text-white">
+              Ahmed Kabeer
+            </h1>
+          </div>
+
+          <div class="mb-5">
+            <p class="hero-role section-heading
+                       text-xl md:text-2xl font-display font-medium
+                       text-accentBlue/90 tracking-tight"
+               id="hero-role" aria-live="polite">
+              Application Developer
+            </p>
+          </div>
+
+          <div>
+            <p class="hero-statement text-secondary
+                       text-base md:text-lg font-sans leading-relaxed font-light max-w-[40ch]">
+              I build systems that don't just work — they scale, adapt, and perform.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════
+           PROJECTS
+      ══════════════════════════════════════ -->
+      <section id="projects" class="relative w-full bg-background z-20">
+
+        <div class="container mx-auto px-6 md:px-12 lg:px-24 max-w-[1400px] py-20 pb-28">
+          <div class="overflow-hidden mb-6">
+            <h2 class="section-heading section-title
+                        text-5xl md:text-7xl font-display font-medium tracking-tight text-white mb-4">
+              Selected Work
+            </h2>
+            <p class="text-secondary text-base md:text-lg max-w-2xl leading-relaxed">
+              Scroll to explore real-world systems I've built — designed for clarity, speed, and real constraints.
+            </p>
+          </div>
+          <div class="w-full h-[1px] bg-white/10 section-divider"></div>
+        </div>
+
+        <div class="projects-wrapper w-full">
+
+          <!-- ── EcoWatt ──────────────────────────────
+               bg-background: prevents Storiq bleeding through.
+               pt-20: clears fixed navbar (72px) so title never hides.
+               iphone-outer scales with viewport height automatically.
+          ────────────────────────────────────────────── -->
+          <div class="project-panel bg-background h-screen w-full relative z-10
+                      flex items-center justify-center
+                      px-6 md:px-12 lg:px-24 pt-20 pb-6"
+               data-project="ecowatt">
+
+            <div class="w-full max-w-[1400px] h-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+
+              <!-- Left: text — ALL static elements permanently visible at pin time -->
+              <div class="flex-1 project-info w-full space-y-4 min-w-0">
+
+                <span class="proj-meta text-accent font-mono text-sm tracking-widest block">
+                  01 · Energy &amp; tariffs
+                </span>
+                <h3 class="proj-title section-heading
+                            text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+                            font-display font-bold text-white leading-[1.05] pb-1">
+                  EcoWatt
+                </h3>
+                <p class="proj-problem text-secondary text-base md:text-lg max-w-xl leading-relaxed">
+                  <span class="text-white/80 font-medium">Problem · </span>Slab-based billing (KSEB) makes costs hard to predict — usage spikes show up as surprise rupees, not early warnings.
+                </p>
+                <p class="proj-feature text-secondary text-base md:text-lg max-w-xl leading-relaxed">
+                  <span class="text-white/80 font-medium">Focus · </span>Slab predictor alerts, an appliance cost calculator with honest ₹ estimates, and a savings view that ties behaviour to real money.
+                </p>
+                <div class="proj-tech flex flex-wrap gap-2 pt-1">
+                  <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Flutter</span>
+                  <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Firebase</span>
+                  <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Tariff / slab logic</span>
+                </div>
+
+                <!--
+                  Dynamic micro slot — JS swaps .micro-heading + .micro-body
+                  as each image becomes active during the scrub.
+                -->
+                <div class="proj-micro pt-4 border-t border-white/10 max-w-xl">
+                  <p class="micro-heading text-[11px] font-mono uppercase tracking-widest text-accent/80 mb-2">Approach</p>
+                  <p class="micro-body text-secondary text-sm md:text-base leading-relaxed">
+                    Step-by-step calculator UX, high-signal home dashboard, and copy that respects regional utility reality — not generic charts.
+                  </p>
+                </div>
+
+                <!-- Repository link (replaces "Start a conversation") -->
+                <div class="proj-cta pt-2">
+                  <a href="https://github.com/ahmedkabeer/ecowatt"
+                     target="_blank" rel="noopener noreferrer"
+                     class="group inline-flex items-center gap-3 text-white font-medium hover:text-accent transition-colors duration-300">
+                    View Repository
+                    <span class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-sm
+                                  group-hover:bg-accent group-hover:border-accent group-hover:text-black
+                                  transition-all duration-300">↗</span>
+                  </a>
+                </div>
+
+              </div>
+
+              <!-- Right: iPhone frame — images contained inside screen area -->
+              <div class="flex-1 w-full flex justify-center lg:justify-end">
+                <div class="iphone-outer">
+                  <!-- Side buttons (decorative) -->
+                  <div class="iphone-buttons-left" aria-hidden="true">
+                    <div class="iphone-btn"></div>
+                    <div class="iphone-btn" style="margin-top:10px"></div>
+                  </div>
+                  <div class="iphone-button-right" aria-hidden="true"></div>
+                  <!-- Dynamic Island -->
+                  <div class="iphone-island" aria-hidden="true"></div>
+                  <!-- Screen: images fill this absolutely -->
+                  <div class="iphone-screen">
+                    <div class="project-fade-stack">
+                      <img src="assets/ecowatt-dashboard.png"
+                           alt="EcoWatt: slab predictor dashboard"
+                           width="1080" height="2400" decoding="async"
+                           class="project-fade-shot">
+                      <img src="assets/ecowatt-savings.png"
+                           alt="EcoWatt: savings view with badges"
+                           width="1080" height="2400" decoding="async"
+                           class="project-fade-shot">
+                      <img src="assets/ecowatt-cost-calculator.png"
+                           alt="EcoWatt: cost calculator"
+                           width="1080" height="2400" decoding="async"
+                           class="project-fade-shot">
+                    </div>
+                  </div>
+                  <!-- Home bar -->
+                  <div class="iphone-home-bar" aria-hidden="true"></div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /ecowatt -->
+
+          <!-- ── Storiq ──────────────────────────────── -->
+          <div class="project-panel bg-background h-screen w-full relative z-10
+                      flex items-center justify-center
+                      px-6 md:px-12 lg:px-24 pt-20 pb-6"
+               data-project="storiq">
+
+            <div class="w-full max-w-[1400px] h-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+
+              <div class="flex-1 project-info w-full space-y-4 min-w-0">
+                <span class="proj-meta text-accent font-mono text-sm tracking-widest block">
+                  02 · Stories without the feed
+                </span>
+                <h3 class="proj-title section-heading
+                            text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+                            font-display font-bold text-white leading-[1.05] pb-1">
+                  Storiq
+                </h3>
+                <p class="proj-problem text-secondary text-base md:text-lg max-w-xl leading-relaxed">
+                  <span class="text-white/80 font-medium">Problem · </span>Reels steals time. But the stories you want often carry ground reality, news, and references worth saving.
+                </p>
+                <p class="proj-feature text-secondary text-base md:text-lg max-w-xl leading-relaxed">
+                  <span class="text-white/80 font-medium">Focus · </span>Storiq isolates chosen accounts' stories, turns them into scannable notes, and helps you stay informed without doomscrolling.
+                </p>
+                <div class="proj-tech flex flex-wrap gap-2 pt-1">
+                  <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Dart / Flutter</span>
+                  <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Ingestion &amp; API</span>
+                  <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Privacy boundaries</span>
+                </div>
+
+                <div class="proj-micro pt-4 border-t border-white/10 max-w-xl">
+                  <p class="micro-heading text-[11px] font-mono uppercase tracking-widest text-accent/80 mb-2">Story Feed</p>
+                  <p class="micro-body text-secondary text-sm md:text-base leading-relaxed">
+                    Consent-first pipelines pull only from approved accounts. No algorithmic surprise — just the accounts you chose.
+                  </p>
+                </div>
+
+                <div class="proj-cta pt-2">
+                  <a href="https://github.com/ahmedkabeer/storiq"
+                     target="_blank" rel="noopener noreferrer"
+                     class="group inline-flex items-center gap-3 text-white font-medium hover:text-accent transition-colors duration-300">
+                    View Repository
+                    <span class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-sm
+                                  group-hover:bg-accent group-hover:border-accent group-hover:text-black
+                                  transition-all duration-300">↗</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="flex-1 w-full flex justify-center lg:justify-end">
+                <div class="iphone-outer">
+                  <div class="iphone-buttons-left" aria-hidden="true">
+                    <div class="iphone-btn"></div>
+                    <div class="iphone-btn" style="margin-top:10px"></div>
+                  </div>
+                  <div class="iphone-button-right" aria-hidden="true"></div>
+                  <div class="iphone-island" aria-hidden="true"></div>
+                  <div class="iphone-screen">
+                    <div class="project-fade-stack">
+                      <img src="assets/storiq-story-1.png"
+                           alt="Storiq: English article card"
+                           width="1080" height="2400" decoding="async"
+                           class="project-fade-shot">
+                      <img src="assets/storiq-story-2.png"
+                           alt="Storiq: Malayalam article card"
+                           width="1080" height="2400" decoding="async"
+                           class="project-fade-shot">
+                    </div>
+                  </div>
+                  <div class="iphone-home-bar" aria-hidden="true"></div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /storiq -->
+
+        </div><!-- /projects-wrapper -->
+      </section>
+
+      <!-- ══════════════════════════════════
+           SKILLS
+           Single #skills-pills container.
+           JS (SKILLS_LIST) is the sole data source.
+           No cloud nodes. No fallback. No data-spans.
+           Zero possibility of duplication.
+      ══════════════════════════════════════ -->
+      <section id="skills"
+        class="min-h-screen w-full relative flex flex-col items-center justify-center
+               py-28 md:py-32 bg-background z-20">
+
+        <div class="z-10 text-center mb-12 px-4">
+          <h2 class="text-xs font-mono tracking-[0.4em] text-accent uppercase mb-6" style="opacity:0.8">Core Expertise</h2>
+          <p class="skills-title section-heading
+                     text-4xl md:text-6xl lg:text-7xl font-display font-medium
+                     max-w-4xl mx-auto leading-tight text-white"
+             style="opacity:0">
+            Precision craft<br>
+            <span class="italic font-light text-secondary">without</span> the noise.
+          </p>
+        </div>
+
+        <!-- Detail card: min-height prevents layout jump when content changes -->
+        <div id="skills-detail" class="skills-detail z-30 max-w-4xl w-full mx-auto px-6">
+          <div class="font-mono uppercase tracking-[0.28em] text-accent text-xs" style="opacity:0.85">Selected Capability</div>
+          <div class="skills-detail__title text-2xl md:text-3xl font-display font-medium text-white mt-3"
+               id="skills-detail-title">Flutter</div>
+          <ul id="skills-detail-bullets"
+              class="skills-detail__bullets mt-5 space-y-2 text-secondary text-base md:text-lg"></ul>
+        </div>
+
+        <!-- Pills: populated entirely by JS. No inline HTML pills. -->
+        <div id="skills-pills"
+             class="skills-pills z-30 max-w-4xl mx-auto px-6 mt-8 md:mt-10 flex flex-wrap justify-center gap-3">
+        </div>
+
+      </section>
+
+      <!-- ══════════════════════════════════
+           CONTACT
+           Links removed from main body —
+           only in footer to avoid duplication.
+      ══════════════════════════════════════ -->
+      <section id="contact"
+        class="min-h-screen w-full bg-surface2 flex flex-col justify-between
+               pt-28 pb-12 px-6 md:px-12 lg:px-24 z-20 relative">
+
+        <div class="flex-1 flex flex-col justify-center items-center text-center max-w-3xl mx-auto w-full">
+          <div class="overflow-hidden mb-10">
+            <h2 class="contact-headline section-heading
+                        text-4xl sm:text-5xl md:text-7xl lg:text-8xl
+                        font-display font-bold leading-[1.05] tracking-tight text-white">
+              Let's build something that actually matters.
+            </h2>
+          </div>
+          <p class="contact-sub text-secondary text-lg md:text-xl max-w-xl mx-auto font-light leading-relaxed mb-12">
+            Clear communication, sharp execution. Reach out with a problem worth solving.
+          </p>
+          <!-- Email CTA: href=mailto opens Gmail / default mail app with address pre-filled -->
+          <a href="mailto:ahmedkabeer@example.com"
+             class="contact-email-btn group inline-flex items-center gap-3
+                    px-8 py-4 rounded-full border border-white/20 text-white font-medium text-lg
+                    hover:border-accent hover:text-accent hover:bg-accent/5
+                    transition-all duration-300">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            Send me an email
+            <span class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-sm
+                          group-hover:bg-accent group-hover:border-accent group-hover:text-black
+                          transition-all duration-300">↗</span>
+          </a>
+        </div>
+
+        <footer class="w-full flex flex-col md:flex-row justify-between items-center
+                        gap-6 mt-20 pt-8 border-t border-white/10 text-secondary text-sm font-medium">
+          <p>Ahmed Kabeer © 2026. Crafted with intent.</p>
+          <div class="flex gap-8">
+            <a href="https://github.com/ahmedkabeer"
+               class="hover:text-accent transition-colors duration-300"
+               target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/ahmedkabeer"
+               class="hover:text-accent transition-colors duration-300"
+               target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </footer>
+
+      </section>
+
+    </div><!-- /smooth-content -->
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
