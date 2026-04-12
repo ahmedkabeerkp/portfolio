@@ -211,42 +211,43 @@ const initPreloader = () => {
 };
 
 // ============================================================
-// 5. PROJECTS — scroll-pinned panels, image crossfade,
-//               synchronised text swap
+// 5. PROJECTS — scroll-pinned panels with CSS crossfade
 //
-//    Per-image copy data lives here in JS — not in the DOM —
-//    so the HTML proj-micro holds only ONE slot that JS swaps.
-//
-//    EcoWatt (3 images): 3 text slides
-//    Storiq   (2 images): 2 text slides
-//
-//    Static elements (title, problem, focus, tech, repo link)
-//    are ALWAYS visible once the panel pins — no scroll animation.
-//    Only the .proj-micro slot changes with each image.
+//    Architecture (why this works when GSAP scrub didn't):
+//    • Images use CSS `opacity` + `transition` controlled by the
+//      `.is-active` class.  CSS transitions are browser-native and
+//      cannot be blocked by GSAP timeline ordering issues.
+//    • ScrollTrigger's `onUpdate` callback fires on EVERY scroll
+//      tick and sets the active index directly — no scrub math,
+//      no GSAP keyframe timing to miscalculate.
+//    • Static text is set visible with inline style before pinning,
+//      so it's guaranteed present when the panel appears.
+//    • Each panel has `bg-background` so no bleed-through from
+//      the next panel during the pin phase.
 // ============================================================
 const PROJECT_SLIDES = {
   ecowatt: [
     {
       heading: 'Dashboard',
-      body:    'High-signal home dashboard with a slab predictor alert. Tells users exactly how many units to the next rate jump — before it happens.',
+      body: 'High-signal home dashboard with a slab predictor alert. Tells users exactly how many units remain before the next rate jump — before it happens.',
     },
     {
       heading: 'Savings',
-      body:    'Behaviour-linked savings view. Badges and streaks make energy discipline feel rewarding. Shows real ₹ saved — not vague percentage tips.',
+      body: 'Behaviour-linked savings view. Badges and streaks make energy discipline feel rewarding. Shows real ₹ saved — not vague percentage tips.',
     },
     {
       heading: 'Cost Calculator',
-      body:    'Appliance-level cost math per KSEB slab. Enter appliance, quantity, duration — get an honest ₹ estimate, not a guess from a generic database.',
+      body: 'Appliance-level cost math per KSEB slab. Enter appliance, quantity, duration — get an honest ₹ estimate, not a guess from a generic database.',
     },
   ],
   storiq: [
     {
       heading: 'Story Feed',
-      body:    'Consent-first pipelines pull only from approved accounts. No algorithmic surprise — just the accounts you actually chose to follow.',
+      body: 'Consent-first pipelines pull only from approved accounts. No algorithmic surprise — just the accounts you actually chose to follow.',
     },
     {
       heading: 'Regional Support',
-      body:    'Full multilingual support including Malayalam. Stories preserve their original voice and context even after summarisation.',
+      body: 'Full multilingual support including Malayalam. Stories preserve their original voice and context even after summarisation.',
     },
   ],
 };
@@ -256,10 +257,12 @@ const initProjects = () => {
 
   // Section divider wipe-in
   gsap.to('.section-divider', {
-    scaleX: 1, ease: EASE.settle,
+    scaleX: 1,
+    ease: EASE.settle,
     scrollTrigger: {
       trigger: '#projects',
-      start: 'top 72%', end: 'top 38%',
+      start: 'top 72%',
+      end: 'top 38%',
       scrub: 1,
     },
   });
@@ -269,116 +272,84 @@ const initProjects = () => {
     const slides   = PROJECT_SLIDES[key] || [];
     const shots    = Array.from(panel.querySelectorAll('.project-fade-shot'));
     const shotCount = shots.length;
+    if (!shotCount) return;
 
-    // DOM refs for the dynamic micro slot
     const microHead = panel.querySelector('.micro-heading');
     const microBody = panel.querySelector('.micro-body');
 
-    // ── Seed the micro slot with slide[0] content ──
+    // ── 1. Guarantee all static text is visible before pin ──
+    ['.proj-meta','.proj-title','.proj-problem','.proj-feature',
+     '.proj-tech','.proj-micro','.proj-cta'].forEach((sel) => {
+      const el = panel.querySelector(sel);
+      if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
+    });
+
+    // ── 2. Seed image and micro-text state ──
+    // First shot already has `is-active` in HTML; rest do not.
+    // Ensure consistency in case of hot-reload or browser cache quirks.
+    shots.forEach((shot, i) => {
+      shot.classList.toggle('is-active', i === 0);
+    });
     if (microHead && slides[0]) microHead.textContent = slides[0].heading;
     if (microBody && slides[0]) microBody.textContent = slides[0].body;
 
-    // ── Static text elements: NO scroll-triggered animation ──
-    // They must be visible the instant the panel pins.
-    const staticEls = [
-      panel.querySelector('.proj-meta'),
-      panel.querySelector('.proj-title'),
-      panel.querySelector('.proj-problem'),
-      panel.querySelector('.proj-feature'),
-      panel.querySelector('.proj-tech'),
-      panel.querySelector('.proj-micro'),
-      panel.querySelector('.proj-cta'),
-    ].filter(Boolean);
-    gsap.set(staticEls, { opacity: 1, y: 0, clearProps: 'all' });
+    // ── 3. Track which slide is currently displayed ──
+    let activeIdx = 0;
 
-    // ── Images ─────────────────────────────────────────────
-    // autoAlpha sets BOTH opacity AND visibility — more reliable
-    // than opacity alone and avoids CSS specificity conflicts.
-    // We only hide shots[1+]; shots[0] starts fully visible.
-    // This guarantees the first image shows immediately at pin,
-    // even if ScrollTrigger hasn't ticked yet.
-    shots.forEach((shot, i) => {
-      if (i === 0) {
-        gsap.set(shot, { autoAlpha: 1, scale: 1 });
-      } else {
-        gsap.set(shot, { autoAlpha: 0, scale: 1 });
-      }
-    });
+    // ── 4. Smooth micro-text swap via opacity fade ──
+    const swapText = (idx) => {
+      const slide = slides[idx];
+      if (!slide || !microHead || !microBody) return;
 
-    // ── Scroll distance — gives each image generous time ──
-    const scrollPx = Math.round(window.innerHeight * (shotCount >= 3 ? 1.9 : 1.5));
+      // Fade out
+      microHead.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+      microBody.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+      microHead.style.opacity = '0';
+      microHead.style.transform = 'translateY(4px)';
+      microBody.style.opacity = '0';
+      microBody.style.transform = 'translateY(4px)';
 
-    // ── Scrub timeline 0 → 1 ──────────────────────────
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger:             panel,
-        start:               'top top',
-        end:                 `+=${scrollPx}`,
-        pin:                 true,
-        pinSpacing:          true,
-        scrub:               1.5,
-        anticipatePin:       1,
-        invalidateOnRefresh: true,
+      // Swap content then fade in
+      setTimeout(() => {
+        microHead.textContent = slide.heading;
+        microBody.textContent = slide.body;
+        microHead.style.opacity = '1';
+        microHead.style.transform = 'translateY(0)';
+        microBody.style.opacity = '1';
+        microBody.style.transform = 'translateY(0)';
+      }, 200);
+    };
+
+    // ── 5. Scroll distance: each image gets a generous viewport-height
+    //       of scroll so the user can clearly see each screen ──
+    const scrollPx = Math.round(window.innerHeight * (shotCount >= 3 ? 2.2 : 1.6));
+
+    // ── 6. ScrollTrigger: pin + onUpdate drives everything ──
+    ScrollTrigger.create({
+      trigger:             panel,
+      start:               'top top',
+      end:                 `+=${scrollPx}`,
+      pin:                 true,
+      pinSpacing:          true,
+      anticipatePin:       1,
+      invalidateOnRefresh: true,
+
+      onUpdate(self) {
+        // Which image should be shown at this scroll progress?
+        const newIdx = Math.min(
+          shotCount - 1,
+          Math.floor(self.progress * shotCount)
+        );
+
+        if (newIdx !== activeIdx) {
+          // Remove active from current, add to new
+          shots[activeIdx].classList.remove('is-active');
+          shots[newIdx].classList.add('is-active');
+          swapText(newIdx);
+          activeIdx = newIdx;
+        }
       },
     });
-
-    if (!prefersReducedMotion && shotCount >= 2) {
-      const SEG  = 1 / shotCount;
-      const FADE = Math.min(SEG * 0.22, 0.09);
-
-      // Helper: smooth text swap with micro-fade
-      const swapText = (slideIdx) => {
-        const slide = slides[slideIdx];
-        if (!slide || !microHead || !microBody) return;
-        gsap.killTweensOf([microHead, microBody]);
-        gsap.to([microHead, microBody], {
-          opacity: 0, y: 4, duration: 0.14, ease: 'power2.in',
-          onComplete: () => {
-            microHead.textContent = slide.heading;
-            microBody.textContent = slide.body;
-            gsap.fromTo([microHead, microBody],
-              { opacity: 0, y: 4 },
-              { opacity: 1, y: 0, duration: 0.20, ease: 'power2.out' }
-            );
-          },
-        });
-      };
-
-      shots.forEach((shot, i) => {
-        const segStart = i * SEG;
-        const segEnd   = segStart + SEG;
-
-        if (i === 0) {
-          // First image: already visible at pin. Scale up across its window,
-          // then crossfade out at the transition point.
-          tl.to(shot, { scale: 1.04, ease: 'none', duration: SEG - FADE }, segStart);
-          tl.to(shot, { autoAlpha: 0, scale: 1, duration: FADE, ease: 'power2.inOut' }, segEnd - FADE);
-        } else if (i < shotCount - 1) {
-          // Middle images: fade in → scale → fade out
-          tl.fromTo(shot,
-            { autoAlpha: 0, scale: 0.98 },
-            { autoAlpha: 1, scale: 1,    duration: FADE, ease: 'power2.out' },
-            segStart);
-          tl.to(shot, { scale: 1.04, ease: 'none', duration: SEG - FADE * 2 }, segStart + FADE);
-          tl.to(shot, { autoAlpha: 0, scale: 1, duration: FADE, ease: 'power2.inOut' }, segEnd - FADE);
-        } else {
-          // Last image: fade in, scale up, hold to timeline end
-          tl.fromTo(shot,
-            { autoAlpha: 0, scale: 0.98 },
-            { autoAlpha: 1, scale: 1,    duration: FADE, ease: 'power2.out' },
-            segStart);
-          tl.to(shot, { scale: 1.04, ease: 'none', duration: SEG - FADE }, segStart + FADE);
-        }
-
-        // Trigger text swap at the midpoint of each image's fade-in
-        // (i === 0 already seeded above, so only swap for i > 0)
-        if (i > 0) {
-          const swapAt = segStart + FADE * 0.5;
-          const capturedIdx = i; // closure capture
-          tl.add(() => swapText(capturedIdx), swapAt);
-        }
-      });
-    }
   });
 };
 
@@ -586,6 +557,34 @@ const initMagneticEffects = () => {
 };
 
 // ============================================================
+// EMAIL BUTTON — uses Gmail's direct compose URL instead of
+// mailto: so it works regardless of system mail client setup.
+// Opens Gmail in a new tab with the To field pre-filled.
+// ============================================================
+const initEmailBtn = () => {
+  const btn = document.getElementById('email-cta');
+  if (!btn) return;
+
+  // Your Gmail address — split so no scanner can intercept it
+  const user   = 'ahmedkabeerkp04';   // ← part before @
+  const domain = 'gmail';
+  const tld    = 'com';
+  const address = `${user}@${domain}.${tld}`;
+
+  // Gmail compose URL — opens directly in browser, no mail client needed
+  const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${address}`;
+
+  btn.href = gmailURL;
+  btn.target = '_blank';
+  btn.rel = 'noopener noreferrer';
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.open(gmailURL, '_blank', 'noopener,noreferrer');
+  });
+};
+
+// ============================================================
 // BOOT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -599,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProjects();
   initSkills();
   initSectionReveals();
+  initEmailBtn();
 
   // Small delay so GSAP registers all ScrollTrigger instances
   // before the preloader starts (avoids race with ScrollTrigger.refresh)

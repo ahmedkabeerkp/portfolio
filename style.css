@@ -108,88 +108,69 @@ body::-webkit-scrollbar { display: none; }
 }
 
 /* ============================================================
-   IPHONE FRAME
-   — Gives app screenshots proper phone chrome so the app's
-     own status bar + appbar + bottom nav all remain visible.
-   — max-height: calc(100vh - 9rem) ensures it never clips
-     behind the navbar on short viewports.
+   PROJECT IMAGE CONTAINER
+   Both EcoWatt and Storiq mockup images are square canvases
+   (1080×1080) with the phone chrome centred on a black bg.
+   The phone inside occupies ~55% of canvas width and ~90% height.
+
+   Strategy:
+   • height driven by viewport so the phone fills the panel top-to-bottom
+   • aspect-ratio: 3/5 matches the phone's actual proportions within
+     the square canvas (~9:15 phone shape)
+   • overflow: hidden clips only the black canvas borders,
+     never the phone itself (phone starts at ~22% from edge;
+     container clips at ~20% — full phone chrome always visible)
+   • object-fit: cover on the <img> zooms to fill the container
    ============================================================ */
-.iphone-outer {
+.project-img-wrap {
   position: relative;
-  width: min(210px, 35vw);
-  max-height: calc(100vh - 9rem);
-  border-radius: 46px;
-  background: #141414;
-  border: 2px solid rgba(255,255,255,.18);
-  /* padding: island space top + home-bar space bottom */
-  padding: 12px 8px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.04),
-    0 0 0 1px rgba(0,0,0,.7),
-    0 40px 90px rgba(0,0,0,.75),
-    0 0 50px rgba(37,99,235,.10);
-  will-change: transform;
-  flex-shrink: 0;
-}
-
-/* Left volume buttons */
-.iphone-buttons-left {
-  position: absolute;
-  left: -5px;
-  top: 26%;
-  display: flex;
-  flex-direction: column;
-}
-.iphone-btn {
-  width: 4px;
-  height: 28px;
-  background: rgba(255,255,255,.14);
-  border-radius: 3px 0 0 3px;
-}
-
-/* Right power button */
-.iphone-button-right {
-  position: absolute;
-  right: -5px;
-  top: 30%;
-  width: 4px;
-  height: 52px;
-  background: rgba(255,255,255,.14);
-  border-radius: 0 3px 3px 0;
-}
-
-/* Dynamic Island */
-.iphone-island {
-  width: 82px;
-  height: 26px;
-  background: #000;
-  border-radius: 14px;
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
-
-/* Screen: fills all remaining height between island and home bar */
-.iphone-screen {
-  width: 100%;
-  flex: 1;
-  min-height: 0;       /* Required: let flexbox shrink below content */
-  border-radius: 5px;
+  height: calc(100vh - 8rem);   /* fills panel minus navbar + breath */
+  aspect-ratio: 3 / 5;          /* phone shape within square canvas */
   overflow: hidden;
-  position: relative;
-  background: #030303;
+  border-radius: 4px;           /* minor rounding; mockup has its own */
+  flex-shrink: 0;
 }
 
-/* Home indicator bar */
-.iphone-home-bar {
-  width: 36%;
-  height: 4px;
-  background: rgba(255,255,255,.30);
-  border-radius: 3px;
-  margin-top: 9px;
+/* Storiq uses same container — both image sets are equivalent format */
+.project-img-wrap--portrait {
+  height: calc(100vh - 8rem);
+  aspect-ratio: 3 / 5;
+  overflow: hidden;
+  border-radius: 4px;
   flex-shrink: 0;
+}
+
+/* ============================================================
+   IMAGE STACK
+   position:relative parent → position:absolute children.
+   This is the ONLY reliable way to stack images.
+   ============================================================ */
+.project-fade-stack {
+  position: absolute;
+  inset: 0;
+}
+
+/* All shots sit in exactly the same space.
+   Visibility is controlled ONLY by the .is-active class.
+   object-fit: cover fills the portrait container — the square canvas's
+   black border edges get clipped, but the phone chrome (centred at ~55%
+   of canvas width) remains fully visible. */
+.project-fade-shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 0.55s ease;
+  pointer-events: none;
+  display: block;
+}
+
+/* Active state — CSS transition animates from 0 to 1 */
+.project-fade-shot.is-active {
+  opacity: 1;
 }
 
 /* ============================================================
@@ -197,33 +178,12 @@ body::-webkit-scrollbar { display: none; }
    ============================================================ */
 .project-panel {
   border-top: 1px solid rgba(255,255,255,.02);
-  will-change: transform;
 }
 
-/* Section divider — starts collapsed; JS scrubs it open */
+/* Section divider wipe — starts collapsed, JS scrubs to scaleX(1) */
 .section-divider {
   transform: scaleX(0);
   transform-origin: left;
-}
-
-/* Image stack: all shots sit in the same absolute position;
-   GSAP controls opacity exclusively — no class toggling. */
-.project-fade-stack {
-  position: absolute;
-  inset: 0;
-}
-.project-fade-shot {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center; /* preserves app's own appbar */
-  /* No opacity here — GSAP (autoAlpha) controls initial visibility.
-     shots[0] starts visible; shots[1+] get autoAlpha:0 in JS. */
-  will-change: opacity, transform;
-  pointer-events: none;
-  transform: scale(1);
 }
 
 /* ============================================================

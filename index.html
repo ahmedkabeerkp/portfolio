@@ -124,11 +124,10 @@
 
         <div class="projects-wrapper w-full">
 
-          <!-- ── EcoWatt ──────────────────────────────
-               bg-background: prevents Storiq bleeding through.
-               pt-20: clears fixed navbar (72px) so title never hides.
-               iphone-outer scales with viewport height automatically.
-          ────────────────────────────────────────────── -->
+          <!-- ── EcoWatt ──
+               bg-background prevents Storiq bleeding through during pin.
+               pt-20 clears fixed navbar so title is never hidden.
+          ──────────────────────────────────────────────────────── -->
           <div class="project-panel bg-background h-screen w-full relative z-10
                       flex items-center justify-center
                       px-6 md:px-12 lg:px-24 pt-20 pb-6"
@@ -137,14 +136,14 @@
             <div class="w-full max-w-[1400px] h-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
               <!-- Left: text — ALL static elements permanently visible at pin time -->
-              <div class="flex-1 project-info w-full space-y-4 min-w-0">
+              <div class="flex-1 project-info w-full space-y-3 min-w-0">
 
                 <span class="proj-meta text-accent font-mono text-sm tracking-widest block">
                   01 · Energy &amp; tariffs
                 </span>
                 <h3 class="proj-title section-heading
                             text-4xl sm:text-5xl md:text-6xl lg:text-7xl
-                            font-display font-bold text-white leading-[1.05] pb-1">
+                            font-display font-bold text-white leading-[1.05]">
                   EcoWatt
                 </h3>
                 <p class="proj-problem text-secondary text-base md:text-lg max-w-xl leading-relaxed">
@@ -153,25 +152,20 @@
                 <p class="proj-feature text-secondary text-base md:text-lg max-w-xl leading-relaxed">
                   <span class="text-white/80 font-medium">Focus · </span>Slab predictor alerts, an appliance cost calculator with honest ₹ estimates, and a savings view that ties behaviour to real money.
                 </p>
-                <div class="proj-tech flex flex-wrap gap-2 pt-1">
+                <div class="proj-tech flex flex-wrap gap-2">
                   <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Flutter</span>
                   <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Firebase</span>
                   <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Tariff / slab logic</span>
                 </div>
 
-                <!--
-                  Dynamic micro slot — JS swaps .micro-heading + .micro-body
-                  as each image becomes active during the scrub.
-                -->
-                <div class="proj-micro pt-4 border-t border-white/10 max-w-xl">
-                  <p class="micro-heading text-[11px] font-mono uppercase tracking-widest text-accent/80 mb-2">Approach</p>
+                <div class="proj-micro pt-2 border-t border-white/10 max-w-xl">
+                  <p class="micro-heading text-[11px] font-mono uppercase tracking-widest text-accent/80 mb-1">Approach</p>
                   <p class="micro-body text-secondary text-sm md:text-base leading-relaxed">
                     Step-by-step calculator UX, high-signal home dashboard, and copy that respects regional utility reality — not generic charts.
                   </p>
                 </div>
 
-                <!-- Repository link (replaces "Start a conversation") -->
-                <div class="proj-cta pt-2">
+                <div class="proj-cta">
                   <a href="https://github.com/ahmedkabeer/ecowatt"
                      target="_blank" rel="noopener noreferrer"
                      class="group inline-flex items-center gap-3 text-white font-medium hover:text-accent transition-colors duration-300">
@@ -184,36 +178,23 @@
 
               </div>
 
-              <!-- Right: iPhone frame — images contained inside screen area -->
+              <!-- Right: Adobe Express mockup images (phone chrome already baked in) -->
               <div class="flex-1 w-full flex justify-center lg:justify-end">
-                <div class="iphone-outer">
-                  <!-- Side buttons (decorative) -->
-                  <div class="iphone-buttons-left" aria-hidden="true">
-                    <div class="iphone-btn"></div>
-                    <div class="iphone-btn" style="margin-top:10px"></div>
+                <div class="project-img-wrap">
+                  <div class="project-fade-stack">
+                    <img src="assets/dashboard_ecowatt.png"
+                         alt="EcoWatt: slab predictor dashboard"
+                         decoding="async"
+                         class="project-fade-shot is-active">
+                    <img src="assets/savings_ecowatt.png"
+                         alt="EcoWatt: savings view with badges"
+                         decoding="async"
+                         class="project-fade-shot">
+                    <img src="assets/estimate_calculator_ecowatt.png"
+                         alt="EcoWatt: cost calculator"
+                         decoding="async"
+                         class="project-fade-shot">
                   </div>
-                  <div class="iphone-button-right" aria-hidden="true"></div>
-                  <!-- Dynamic Island -->
-                  <div class="iphone-island" aria-hidden="true"></div>
-                  <!-- Screen: images fill this absolutely -->
-                  <div class="iphone-screen">
-                    <div class="project-fade-stack">
-                      <img src="assets/ecowatt-dashboard.png"
-                           alt="EcoWatt: slab predictor dashboard"
-                           width="1080" height="2400" decoding="async"
-                           class="project-fade-shot">
-                      <img src="assets/ecowatt-savings.png"
-                           alt="EcoWatt: savings view with badges"
-                           width="1080" height="2400" decoding="async"
-                           class="project-fade-shot">
-                      <img src="assets/ecowatt-cost-calculator.png"
-                           alt="EcoWatt: cost calculator"
-                           width="1080" height="2400" decoding="async"
-                           class="project-fade-shot">
-                    </div>
-                  </div>
-                  <!-- Home bar -->
-                  <div class="iphone-home-bar" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -228,13 +209,13 @@
 
             <div class="w-full max-w-[1400px] h-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
-              <div class="flex-1 project-info w-full space-y-4 min-w-0">
+              <div class="flex-1 project-info w-full space-y-3 min-w-0">
                 <span class="proj-meta text-accent font-mono text-sm tracking-widest block">
                   02 · Stories without the feed
                 </span>
                 <h3 class="proj-title section-heading
                             text-4xl sm:text-5xl md:text-6xl lg:text-7xl
-                            font-display font-bold text-white leading-[1.05] pb-1">
+                            font-display font-bold text-white leading-[1.05]">
                   Storiq
                 </h3>
                 <p class="proj-problem text-secondary text-base md:text-lg max-w-xl leading-relaxed">
@@ -243,20 +224,20 @@
                 <p class="proj-feature text-secondary text-base md:text-lg max-w-xl leading-relaxed">
                   <span class="text-white/80 font-medium">Focus · </span>Storiq isolates chosen accounts' stories, turns them into scannable notes, and helps you stay informed without doomscrolling.
                 </p>
-                <div class="proj-tech flex flex-wrap gap-2 pt-1">
+                <div class="proj-tech flex flex-wrap gap-2">
                   <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Dart / Flutter</span>
                   <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Ingestion &amp; API</span>
                   <span class="px-3 py-1.5 rounded-full border border-white/10 text-xs md:text-sm text-gray-300">Privacy boundaries</span>
                 </div>
 
-                <div class="proj-micro pt-4 border-t border-white/10 max-w-xl">
-                  <p class="micro-heading text-[11px] font-mono uppercase tracking-widest text-accent/80 mb-2">Story Feed</p>
+                <div class="proj-micro pt-2 border-t border-white/10 max-w-xl">
+                  <p class="micro-heading text-[11px] font-mono uppercase tracking-widest text-accent/80 mb-1">Story Feed</p>
                   <p class="micro-body text-secondary text-sm md:text-base leading-relaxed">
                     Consent-first pipelines pull only from approved accounts. No algorithmic surprise — just the accounts you chose.
                   </p>
                 </div>
 
-                <div class="proj-cta pt-2">
+                <div class="proj-cta">
                   <a href="https://github.com/ahmedkabeer/storiq"
                      target="_blank" rel="noopener noreferrer"
                      class="group inline-flex items-center gap-3 text-white font-medium hover:text-accent transition-colors duration-300">
@@ -269,26 +250,17 @@
               </div>
 
               <div class="flex-1 w-full flex justify-center lg:justify-end">
-                <div class="iphone-outer">
-                  <div class="iphone-buttons-left" aria-hidden="true">
-                    <div class="iphone-btn"></div>
-                    <div class="iphone-btn" style="margin-top:10px"></div>
+                <div class="project-img-wrap project-img-wrap--portrait">
+                  <div class="project-fade-stack">
+                    <img src="assets/storiq_english.png"
+                         alt="Storiq: English article card"
+                         decoding="async"
+                         class="project-fade-shot is-active">
+                    <img src="assets/storiq_malayalam.png"
+                         alt="Storiq: Malayalam article card"
+                         decoding="async"
+                         class="project-fade-shot">
                   </div>
-                  <div class="iphone-button-right" aria-hidden="true"></div>
-                  <div class="iphone-island" aria-hidden="true"></div>
-                  <div class="iphone-screen">
-                    <div class="project-fade-stack">
-                      <img src="assets/storiq-story-1.png"
-                           alt="Storiq: English article card"
-                           width="1080" height="2400" decoding="async"
-                           class="project-fade-shot">
-                      <img src="assets/storiq-story-2.png"
-                           alt="Storiq: Malayalam article card"
-                           width="1080" height="2400" decoding="async"
-                           class="project-fade-shot">
-                    </div>
-                  </div>
-                  <div class="iphone-home-bar" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -356,8 +328,10 @@
           <p class="contact-sub text-secondary text-lg md:text-xl max-w-xl mx-auto font-light leading-relaxed mb-12">
             Clear communication, sharp execution. Reach out with a problem worth solving.
           </p>
-          <!-- Email CTA: href=mailto opens Gmail / default mail app with address pre-filled -->
-          <a href="mailto:ahmedkabeer@example.com"
+          <!-- Email CTA: mailto constructed via JS so Cloudflare obfuscation
+               cannot intercept and rewrite it. Works in all browsers/mail clients. -->
+          <a id="email-cta"
+             href="#"
              class="contact-email-btn group inline-flex items-center gap-3
                     px-8 py-4 rounded-full border border-white/20 text-white font-medium text-lg
                     hover:border-accent hover:text-accent hover:bg-accent/5
@@ -399,3 +373,4 @@
   <script src="main.js"></script>
 </body>
 </html>
+  <scr
