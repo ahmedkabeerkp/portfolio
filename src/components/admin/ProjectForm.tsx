@@ -72,6 +72,47 @@ export default function ProjectForm({
     }
   }
 
+  async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files?.length) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const path = `${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("project-media")
+          .upload(path, file);
+        if (uploadError) throw uploadError;
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("project-media").getPublicUrl(path);
+        uploaded.push(publicUrl);
+      }
+      setForm((f) => ({ ...f, gallery_urls: [...(f.gallery_urls ?? []), ...uploaded] }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeGalleryImage(url: string) {
+    setForm((f) => ({ ...f, gallery_urls: (f.gallery_urls ?? []).filter((u) => u !== url) }));
+  }
+
+  function moveGalleryImage(index: number, dir: -1 | 1) {
+    setForm((f) => {
+      const arr = [...(f.gallery_urls ?? [])];
+      const target = index + dir;
+      if (target < 0 || target >= arr.length) return f;
+      [arr[index], arr[target]] = [arr[target], arr[index]];
+      return { ...f, gallery_urls: arr };
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -222,6 +263,59 @@ export default function ProjectForm({
           />
           {uploading && <span className="text-sm text-white/40">Uploading…</span>}
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm text-white/50 mb-1">
+          Gallery <span className="text-white/30">(2–3 screenshots — these are what crossfade in a stack as visitors scroll through this project on the live site; the thumbnail above is only used as a fallback if this is empty)</span>
+        </label>
+        {!!form.gallery_urls?.length && (
+          <div className="flex flex-wrap gap-3 mb-3">
+            {form.gallery_urls.map((url, i) => (
+              <div key={url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={`Gallery ${i + 1}`}
+                  className="w-20 h-20 object-cover rounded-lg border border-white/15"
+                />
+                <div className="flex gap-1 mt-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => moveGalleryImage(i, -1)}
+                    disabled={i === 0}
+                    className="text-white/50 hover:text-white disabled:opacity-20"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveGalleryImage(i, 1)}
+                    disabled={i === (form.gallery_urls?.length ?? 0) - 1}
+                    className="text-white/50 hover:text-white disabled:opacity-20"
+                  >
+                    →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryImage(url)}
+                    className="text-red-400 hover:text-red-300 ml-auto"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleGalleryUpload}
+          disabled={uploading}
+          className="text-sm text-white/70"
+        />
       </div>
 
       <label className="flex items-center gap-2 text-sm text-white/70">
