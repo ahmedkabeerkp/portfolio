@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/motion/SmoothScrollProvider";
+import CustomCursor from "@/components/motion/CustomCursor";
+import MouseTrail from "@/components/motion/MouseTrail";
+
 
 const display = Space_Grotesk({
   variable: "--font-display",
@@ -28,6 +31,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="bg-background text-foreground antialiased">
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <CustomCursor />
+        <MouseTrail />
       </body>
     </html>
   );

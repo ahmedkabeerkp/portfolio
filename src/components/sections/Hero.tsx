@@ -22,17 +22,17 @@ export default function Hero({ profile }: { profile: Partial<Profile> }) {
     <section className="relative min-h-screen w-full flex flex-col justify-center px-6 md:px-12 lg:px-24 max-w-[1400px] mx-auto">
       <div className="overflow-hidden">
         <h1
-          ref={nameRef}
-          className="font-display font-semibold leading-[0.95] tracking-tight text-[clamp(3rem,9vw,7rem)]"
-        >
+  ref={nameRef}
+  className="section-heading font-display font-semibold leading-[0.95] tracking-tight text-[clamp(3rem,9vw,7rem)]"
+>
           {profile.name ?? "Ahmed Kabeer"}
         </h1>
       </div>
 
       <p
-        ref={roleRef}
-        className="font-display mt-5 text-xl md:text-2xl text-accent tracking-tight"
-      >
+  ref={roleRef}
+  className="section-heading font-display mt-5 text-xl md:text-2xl text-accent tracking-tight"
+>
         {profile.role ?? "Application Developer"}
       </p>
 

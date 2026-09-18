@@ -10,53 +10,52 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function ProjectPanel({ project, index }: { project: Project; index: number }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const shotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Fall back to the single thumbnail if no gallery images were uploaded.
-  const images = project.gallery_urls?.length ? project.gallery_urls : project.thumbnail_url ? [project.thumbnail_url] : [];
+  const images = project.gallery_urls?.length
+    ? project.gallery_urls
+    : project.thumbnail_url
+    ? [project.thumbnail_url]
+    : [];
 
   useEffect(() => {
     const panel = panelRef.current;
-    if (!panel || images.length < 2) return; // nothing to crossfade with 0-1 images
+    if (!panel || images.length < 2) return;
 
-    const ctx = gsap.context(() => {
-      const shots = imgRefs.current.filter(Boolean) as HTMLDivElement[];
+    const shots = shotRefs.current.filter(Boolean) as HTMLDivElement[];
+    const shotCount = shots.length;
+    let activeIdx = 0;
 
-      // Start state: only the first shot visible, on top of the stack.
-      gsap.set(shots[0], { autoAlpha: 1, y: 0, scale: 1, zIndex: shots.length });
-      shots.slice(1).forEach((el, i) => {
-        gsap.set(el, { autoAlpha: 0, y: 24, scale: 0.96, zIndex: shots.length - 1 - i });
-      });
+    // seed state — first shot visible, rest hidden
+    shots.forEach((el, i) => el.classList.toggle("is-active", i === 0));
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: panel,
-          start: "top top",
-          end: `+=${shots.length * 70}%`,
-          scrub: 0.6,
-          pin: true,
-          pinSpacing: true,
-        },
-      });
+    // generous scroll distance per shot, same ratio as the old site
+    const scrollPx = Math.round(
+      window.innerHeight * (shotCount >= 3 ? 2.2 : 1.6)
+    );
 
-      shots.forEach((el, i) => {
-        if (i === shots.length - 1) return;
-        const next = shots[i + 1];
-        const label = `step${i}`;
-        tl.addLabel(label)
-          // outgoing shot sinks back and dims, staying in the stack behind
-          .to(el, { y: -24, scale: 0.94, autoAlpha: 0.35, zIndex: 1, duration: 1 }, label)
-          // incoming shot rises from behind and takes the front
-          .fromTo(
-            next,
-            { autoAlpha: 0, y: 24, scale: 0.96 },
-            { autoAlpha: 1, y: 0, scale: 1, zIndex: shots.length, duration: 1 },
-            label
-          );
-      });
-    }, panel);
+    const st = ScrollTrigger.create({
+      trigger: panel,
+      start: "top top",
+      end: `+=${scrollPx}`,
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate(self) {
+        const newIdx = Math.min(
+          shotCount - 1,
+          Math.floor(self.progress * shotCount)
+        );
+        if (newIdx !== activeIdx) {
+          shots[activeIdx].classList.remove("is-active");
+          shots[newIdx].classList.add("is-active");
+          activeIdx = newIdx;
+        }
+      },
+    });
 
-    return () => ctx.revert();
+    return () => st.kill();
   }, [images.length]);
 
   return (
@@ -69,7 +68,7 @@ export default function ProjectPanel({ project, index }: { project: Project; ind
           <span className="text-accent font-mono text-sm tracking-widest block">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <h3 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05]">
+          <h3 className="section-heading font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05]">
             {project.title}
           </h3>
           {project.problem && (
@@ -117,21 +116,20 @@ export default function ProjectPanel({ project, index }: { project: Project; ind
         </div>
 
         <div className="flex-1 w-full flex justify-center lg:justify-end">
-          <div className="relative w-[240px] h-[500px] md:w-[280px] md:h-[580px]">
+          <div className="project-img-wrap relative w-[300px] h-[620px] md:w-[360px] md:h-[740px] lg:w-[400px] lg:h-[820px]">
             {images.map((src, i) => (
               <div
                 key={src + i}
                 ref={(el) => {
-                  imgRefs.current[i] = el;
+                  shotRefs.current[i] = el;
                 }}
-                className="absolute inset-0"
-                style={{ opacity: i === 0 ? 1 : images.length > 1 ? 0 : 1 }}
+                className={`project-fade-shot absolute inset-0${i === 0 ? " is-active" : ""}`}
               >
                 <Image
                   src={src}
                   alt={`${project.title} screenshot ${i + 1}`}
                   fill
-                  sizes="280px"
+                  sizes="400px"
                   className="object-contain drop-shadow-2xl"
                   priority={index === 0 && i === 0}
                 />

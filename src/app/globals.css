@@ -47,3 +47,67 @@ body {
   background: var(--border);
   height: 1px;
 }
+
+/* ── Project crossfade — CSS-driven, matches old site exactly ── */
+.project-fade-shot {
+  opacity: 0;
+  transform: translateY(24px) scale(0.96);
+  transition: opacity 0.5s ease, transform 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.project-fade-shot.is-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* ── Hover color-shift on headings ── */
+.section-heading {
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.section-heading:hover {
+  color: var(--accent);
+  transform: translateY(-4px);
+}
+
+/* ── Custom cursor ── */
+.has-custom-cursor,
+.has-custom-cursor a,
+.has-custom-cursor button {
+  cursor: none;
+}
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  pointer-events: none;
+  z-index: 9998;
+  transition: width 0.25s ease, height 0.25s ease, opacity 0.25s ease;
+}
+.cursor-ring--hover {
+  width: 56px;
+  height: 56px;
+  opacity: 0.6;
+}
+
+/* ── Mouse trail canvas ── */
+#mouse-trail-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
