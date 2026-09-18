@@ -19,44 +19,53 @@ export default function ProjectPanel({ project, index }: { project: Project; ind
     : [];
 
   useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel || images.length < 2) return;
+  const panel = panelRef.current;
+  if (!panel || images.length < 2) return;
 
-    const shots = shotRefs.current.filter(Boolean) as HTMLDivElement[];
-    const shotCount = shots.length;
-    let activeIdx = 0;
+  const shots = shotRefs.current.filter(Boolean) as HTMLDivElement[];
+  const shotCount = shots.length;
+  let activeIdx = 0;
 
-    // seed state — first shot visible, rest hidden
-    shots.forEach((el, i) => el.classList.toggle("is-active", i === 0));
+  shots.forEach((el, i) => el.classList.toggle("is-active", i === 0));
 
-    // generous scroll distance per shot, same ratio as the old site
-    const scrollPx = Math.round(
-      window.innerHeight * (shotCount >= 3 ? 2.2 : 1.6)
-    );
+  const scrollPx = Math.round(
+    window.innerHeight * (shotCount >= 3 ? 2.2 : 1.6)
+  );
 
-    const st = ScrollTrigger.create({
-      trigger: panel,
-      start: "top top",
-      end: `+=${scrollPx}`,
-      pin: true,
-      pinSpacing: true,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate(self) {
-        const newIdx = Math.min(
-          shotCount - 1,
-          Math.floor(self.progress * shotCount)
-        );
-        if (newIdx !== activeIdx) {
-          shots[activeIdx].classList.remove("is-active");
-          shots[newIdx].classList.add("is-active");
-          activeIdx = newIdx;
-        }
-      },
-    });
+  const st = ScrollTrigger.create({
+    trigger: panel,
+    start: "top top",
+    end: `+=${scrollPx}`,
+    pin: true,
+    pinSpacing: true,
+    anticipatePin: 1,
+    invalidateOnRefresh: true,
+    onUpdate(self) {
+      const newIdx = Math.min(
+        shotCount - 1,
+        Math.floor(self.progress * shotCount)
+      );
+      if (newIdx !== activeIdx) {
+        shots[activeIdx].classList.remove("is-active");
+        shots[newIdx].classList.add("is-active");
+        activeIdx = newIdx;
+      }
+    },
+  });
 
-    return () => st.kill();
-  }, [images.length]);
+  // NEW — recalculate pin positions once all images/fonts have settled,
+  // so "top top" fires at the correct scroll offset instead of an
+  // offset calculated before layout finished shifting.
+  const onLoad = () => ScrollTrigger.refresh();
+  window.addEventListener("load", onLoad);
+  const t = setTimeout(() => ScrollTrigger.refresh(), 500);
+
+  return () => {
+    st.kill();
+    window.removeEventListener("load", onLoad);
+    clearTimeout(t);
+  };
+}, [images.length]);
 
   return (
     <div
@@ -123,7 +132,7 @@ export default function ProjectPanel({ project, index }: { project: Project; ind
                 ref={(el) => {
                   shotRefs.current[i] = el;
                 }}
-                className={`project-fade-shot absolute inset-0${i === 0 ? " is-active" : ""}`}
+                className={`project-fade-shot absolute inset-0 ${i === 0 ? "is-active" : ""}`}
               >
                 <Image
                   src={src}
