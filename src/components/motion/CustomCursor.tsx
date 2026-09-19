@@ -4,60 +4,65 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
 export default function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Skip on touch devices — a custom cursor makes no sense there.
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const dot = dotRef.current;
-    const ring = ringRef.current;
-    if (!dot || !ring) return;
+    const el = cursorRef.current;
+    if (!el) return;
 
-    const ringPos = { x: 0, y: 0 };
+    const pos = { x: 0, y: 0 };
     const mouse = { x: 0, y: 0 };
-
-    gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
+    gsap.set(el, { xPercent: -15, yPercent: -10 });
 
     const onMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
-      gsap.set(dot, { x: mouse.x, y: mouse.y });
     };
     window.addEventListener("mousemove", onMove);
 
     const ticker = () => {
-      ringPos.x += (mouse.x - ringPos.x) * 0.18;
-      ringPos.y += (mouse.y - ringPos.y) * 0.18;
-      gsap.set(ring, { x: ringPos.x, y: ringPos.y });
+      pos.x += (mouse.x - pos.x) * 0.25;
+      pos.y += (mouse.y - pos.y) * 0.25;
+      gsap.set(el, { x: pos.x, y: pos.y });
     };
     gsap.ticker.add(ticker);
 
     const hoverables = 'a, button, [role="button"], input, textarea';
-    const onEnter = () => ring.classList.add("cursor-ring--hover");
-    const onLeave = () => ring.classList.remove("cursor-ring--hover");
-
-    document.addEventListener("mouseover", (e) => {
+    const onEnter = () => el.classList.add("cursor-arrow--hover");
+    const onLeave = () => el.classList.remove("cursor-arrow--hover");
+    const onOver = (e: MouseEvent) => {
       if ((e.target as Element)?.closest?.(hoverables)) onEnter();
-    });
-    document.addEventListener("mouseout", (e) => {
+    };
+    const onOut = (e: MouseEvent) => {
       if ((e.target as Element)?.closest?.(hoverables)) onLeave();
-    });
+    };
+    document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseout", onOut);
 
     document.documentElement.classList.add("has-custom-cursor");
 
     return () => {
       window.removeEventListener("mousemove", onMove);
       gsap.ticker.remove(ticker);
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
       document.documentElement.classList.remove("has-custom-cursor");
     };
   }, []);
 
   return (
-    <>
-      <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
-      <div ref={ringRef} className="cursor-ring" aria-hidden="true" />
-    </>
+    <div ref={cursorRef} className="cursor-arrow" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 3.5 L4 19.5 L8.5 15.8 L11.3 21.5 L14 20.2 L11.2 14.5 L17 14 Z"
+          fill="white"
+          stroke="black"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
   );
 }

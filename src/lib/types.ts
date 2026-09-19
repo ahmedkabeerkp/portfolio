@@ -25,6 +25,7 @@ export interface Project {
   repo_url: string | null;
   live_url: string | null;
   is_featured: boolean;
+  approach_items: { heading: string; body: string }[];
 }
 
 export interface Skill {

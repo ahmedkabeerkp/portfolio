@@ -14,6 +14,8 @@ function slugify(s: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+type ApproachItem = { heading: string; body: string };
+
 export default function ProjectForm({
   project,
 }: {
@@ -26,11 +28,9 @@ export default function ProjectForm({
       slug: "",
       problem: "",
       focus: "",
-      approach_heading: "",
-      approach_body: "",
       tech_tags: [],
-      thumbnail_url: "",
       gallery_urls: [],
+      approach_items: [],
       repo_url: "",
       live_url: "",
       is_featured: false,
@@ -46,30 +46,16 @@ export default function ProjectForm({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  async function handleThumbnailUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError(null);
-    try {
-      // Uploads directly from the browser using the signed-in admin's
-      // session — RLS on storage.objects (see supabase/schema.sql) is what
-      // actually permits this, not anything in this component.
-      const supabase = createClient();
-      const path = `${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("project-media")
-        .upload(path, file);
-      if (uploadError) throw uploadError;
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("project-media").getPublicUrl(path);
-      field("thumbnail_url", publicUrl);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
+  function approachItems(): ApproachItem[] {
+    return form.approach_items ?? [];
+  }
+
+  function setApproachItem(i: number, patch: Partial<ApproachItem>) {
+    setForm((f) => {
+      const arr = [...(f.approach_items ?? [])];
+      arr[i] = { ...(arr[i] ?? { heading: "", body: "" }), ...patch };
+      return { ...f, approach_items: arr };
+    });
   }
 
   async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -91,7 +77,14 @@ export default function ProjectForm({
         } = supabase.storage.from("project-media").getPublicUrl(path);
         uploaded.push(publicUrl);
       }
-      setForm((f) => ({ ...f, gallery_urls: [...(f.gallery_urls ?? []), ...uploaded] }));
+      setForm((f) => ({
+        ...f,
+        gallery_urls: [...(f.gallery_urls ?? []), ...uploaded],
+        approach_items: [
+          ...(f.approach_items ?? []),
+          ...uploaded.map(() => ({ heading: "", body: "" })),
+        ],
+      }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -99,17 +92,23 @@ export default function ProjectForm({
     }
   }
 
-  function removeGalleryImage(url: string) {
-    setForm((f) => ({ ...f, gallery_urls: (f.gallery_urls ?? []).filter((u) => u !== url) }));
+  function removeGalleryImage(index: number) {
+    setForm((f) => ({
+      ...f,
+      gallery_urls: (f.gallery_urls ?? []).filter((_, i) => i !== index),
+      approach_items: (f.approach_items ?? []).filter((_, i) => i !== index),
+    }));
   }
 
   function moveGalleryImage(index: number, dir: -1 | 1) {
     setForm((f) => {
-      const arr = [...(f.gallery_urls ?? [])];
+      const urls = [...(f.gallery_urls ?? [])];
+      const items = [...(f.approach_items ?? [])];
       const target = index + dir;
-      if (target < 0 || target >= arr.length) return f;
-      [arr[index], arr[target]] = [arr[target], arr[index]];
-      return { ...f, gallery_urls: arr };
+      if (target < 0 || target >= urls.length) return f;
+      [urls[index], urls[target]] = [urls[target], urls[index]];
+      [items[index], items[target]] = [items[target], items[index]];
+      return { ...f, gallery_urls: urls, approach_items: items };
     });
   }
 
@@ -182,32 +181,12 @@ export default function ProjectForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm text-white/50 mb-1">Approach heading</label>
-          <input
-            value={form.approach_heading ?? ""}
-            onChange={(e) => field("approach_heading", e.target.value)}
-            className="w-full bg-transparent border border-white/15 rounded-lg px-3 py-2 outline-none focus:border-white/50"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-white/50 mb-1">Order index</label>
-          <input
-            type="number"
-            value={form.order_index ?? 0}
-            onChange={(e) => field("order_index", Number(e.target.value))}
-            className="w-full bg-transparent border border-white/15 rounded-lg px-3 py-2 outline-none focus:border-white/50"
-          />
-        </div>
-      </div>
-
       <div>
-        <label className="block text-sm text-white/50 mb-1">Approach body</label>
-        <textarea
-          value={form.approach_body ?? ""}
-          onChange={(e) => field("approach_body", e.target.value)}
-          rows={2}
+        <label className="block text-sm text-white/50 mb-1">Order index</label>
+        <input
+          type="number"
+          value={form.order_index ?? 0}
+          onChange={(e) => field("order_index", Number(e.target.value))}
           className="w-full bg-transparent border border-white/15 rounded-lg px-3 py-2 outline-none focus:border-white/50"
         />
       </div>
@@ -244,70 +223,68 @@ export default function ProjectForm({
       </div>
 
       <div>
-        <label className="block text-sm text-white/50 mb-1">Thumbnail</label>
-        <div className="flex items-center gap-4">
-          {form.thumbnail_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={form.thumbnail_url}
-              alt="Thumbnail preview"
-              className="w-20 h-20 object-cover rounded-lg border border-white/15"
-            />
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleThumbnailUpload}
-            disabled={uploading}
-            className="text-sm text-white/70"
-          />
-          {uploading && <span className="text-sm text-white/40">Uploading…</span>}
-        </div>
-      </div>
-
-      <div>
         <label className="block text-sm text-white/50 mb-1">
-          Gallery <span className="text-white/30">(2–3 screenshots — these are what crossfade in a stack as visitors scroll through this project on the live site; the thumbnail above is only used as a fallback if this is empty)</span>
+          Gallery{" "}
+          <span className="text-white/30">
+            (2–3 screenshots — these crossfade as visitors scroll through this project; each one gets its own Approach text below, shown while that image is on screen)
+          </span>
         </label>
+
         {!!form.gallery_urls?.length && (
-          <div className="flex flex-wrap gap-3 mb-3">
+          <div className="space-y-4 mb-4">
             {form.gallery_urls.map((url, i) => (
-              <div key={url} className="relative">
+              <div key={url + i} className="flex gap-3 border border-white/10 rounded-lg p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={url}
                   alt={`Gallery ${i + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg border border-white/15"
+                  className="w-20 h-20 object-cover rounded-lg border border-white/15 shrink-0"
                 />
-                <div className="flex gap-1 mt-1 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => moveGalleryImage(i, -1)}
-                    disabled={i === 0}
-                    className="text-white/50 hover:text-white disabled:opacity-20"
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveGalleryImage(i, 1)}
-                    disabled={i === (form.gallery_urls?.length ?? 0) - 1}
-                    className="text-white/50 hover:text-white disabled:opacity-20"
-                  >
-                    →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeGalleryImage(url)}
-                    className="text-red-400 hover:text-red-300 ml-auto"
-                  >
-                    ✕
-                  </button>
+                <div className="flex-1 space-y-2">
+                  <div className="flex gap-1 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => moveGalleryImage(i, -1)}
+                      disabled={i === 0}
+                      className="text-white/50 hover:text-white disabled:opacity-20"
+                    >
+                      ← move up
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveGalleryImage(i, 1)}
+                      disabled={i === (form.gallery_urls?.length ?? 0) - 1}
+                      className="text-white/50 hover:text-white disabled:opacity-20"
+                    >
+                      move down →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(i)}
+                      className="text-red-400 hover:text-red-300 ml-auto"
+                    >
+                      ✕ remove
+                    </button>
+                  </div>
+                  <input
+                    value={approachItems()[i]?.heading ?? ""}
+                    onChange={(e) => setApproachItem(i, { heading: e.target.value })}
+                    placeholder="Approach heading (e.g. Dashboard)"
+                    className="w-full bg-transparent border border-white/15 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-white/50"
+                  />
+                  <textarea
+                    value={approachItems()[i]?.body ?? ""}
+                    onChange={(e) => setApproachItem(i, { body: e.target.value })}
+                    placeholder="Approach text for this image"
+                    rows={2}
+                    className="w-full bg-transparent border border-white/15 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-white/50"
+                  />
                 </div>
               </div>
             ))}
           </div>
         )}
+
         <input
           type="file"
           accept="image/*"
@@ -316,6 +293,7 @@ export default function ProjectForm({
           disabled={uploading}
           className="text-sm text-white/70"
         />
+        {uploading && <span className="text-sm text-white/40 block mt-1">Uploading…</span>}
       </div>
 
       <label className="flex items-center gap-2 text-sm text-white/70">
